@@ -49,6 +49,7 @@ app.get("/api/candidate/:role/:number", async (req,res) => {
   const d=await load();
   const c=d.candidates.find(x=>x.role===role && x.number===number);
   if(!c) return res.status(404).json({error:"Candidatura não encontrada na base sincronizada."});
+  if(c.role==="DEPUTADO FEDERAL" && c.number==="1023" && !c.photo) c.photo="/assets/dani-photo-fallback.png";
   res.json(c);
 });
 

@@ -13,7 +13,7 @@
       "party": "REPUBLICANOS",
       "partyName": "REPUBLICANOS",
       "status": "BASE INICIAL — ATUALIZAR PELO TSE",
-      "photo": null
+      "photo": "/assets/dani-photo-fallback.png"
     }
   ]
 }

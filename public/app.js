@@ -7,7 +7,7 @@ const defs=[
 {id:"presidente",role:"PRESIDENTE",info:"presidenteInfo",max:2}
 ];
 const STORAGE_KEY="colinha-dani-linhares-v9";
-const state=new Map(); let currentSearchId=null; let searchTimer=null; let lastImage=null;
+const state=new Map(); const pendingLookups=new Map(); const lookupTokens=new Map(); let currentSearchId=null; let searchTimer=null; let lastImage=null;
 const digits=v=>String(v||"").replace(/\D/g,"");
 const normalize=v=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
@@ -16,20 +16,36 @@ function showAlert(message,focusId){ $("alertMessage").textContent=message; $("a
 $("closeAlert").onclick=()=>{const id=$("closeAlert").dataset.focus;$("alertModal").classList.add("hidden");if(id)$(id).focus()};
 
 async function lookup(d){
- const el=$(d.id), info=$(d.info); el.value=digits(el.value).slice(0,d.max); info.innerHTML=""; el.classList.remove("ok","bad"); state.delete(d.id);
- if(el.value.length!==d.max){saveDraft();return}
+ const el=$(d.id), info=$(d.info);
+ el.value=digits(el.value).slice(0,d.max);
+ const requestedNumber=el.value;
+ const token=Symbol(); lookupTokens.set(d.id,token);
+ info.innerHTML=""; el.classList.remove("ok","bad"); state.delete(d.id);
+ if(el.value.length!==d.max){saveDraft();return null}
  if((d.id==="senador1"||d.id==="senador2")){
   const otherId=d.id==="senador1"?"senador2":"senador1", other=digits($(otherId).value);
-  if(other&&other===el.value){el.classList.add("bad");info.innerHTML='<div class="msg">Escolha um número diferente do outro senador.</div>';saveDraft();return}
+  if(other&&other===el.value){el.classList.add("bad");info.innerHTML='<div class="msg">Escolha um número diferente do outro senador.</div>';saveDraft();return null}
  }
- try{
-  const r=await fetch(`/api/candidate/${encodeURIComponent(d.role)}/${el.value}`); if(!r.ok)throw 0; const c=await r.json();
-  state.set(d.id,c);el.classList.add("ok");
-  info.innerHTML=`<div class="candidate">${c.photo?`<img src="${esc(c.photo)}" alt="">`:""}<div><strong>${esc(c.ballotName)}</strong><small>${esc(c.party||"")} · ${esc(c.status||"")}</small></div></div>`;
- }catch{el.classList.add("bad");info.innerHTML='<div class="msg">Número não localizado na base sincronizada.</div>';}
- saveDraft();
+ const request=(async()=>{
+  try{
+   const r=await fetch(`/api/candidate/${encodeURIComponent(d.role)}/${requestedNumber}`);
+   if(!r.ok)throw 0;
+   const c=await r.json();
+   if(lookupTokens.get(d.id)!==token || digits($(d.id).value)!==requestedNumber)return c;
+   state.set(d.id,c); el.classList.add("ok");
+   info.innerHTML=`<div class="candidate">${c.photo?`<img src="${esc(c.photo)}" alt="">`:""}<div><strong>${esc(c.ballotName)}</strong><small>${esc(c.party||"")} · ${esc(c.status||"")}</small></div></div>`;
+   return c;
+  }catch{
+   if(lookupTokens.get(d.id)===token && digits($(d.id).value)===requestedNumber){el.classList.add("bad");info.innerHTML='<div class="msg">Número não localizado na base sincronizada.</div>';}
+   return null;
+  }finally{
+   if(pendingLookups.get(d.id)===request)pendingLookups.delete(d.id);
+   saveDraft();
+  }
+ })();
+ pendingLookups.set(d.id,request);
+ return request;
 }
-
 defs.forEach(d=>$(d.id).addEventListener("input",()=>{
  lookup(d); if(d.id==="senador1"||d.id==="senador2"){
   const otherId=d.id==="senador1"?"senador2":"senador1", otherDef=defs.find(x=>x.id===otherId);
@@ -47,10 +63,15 @@ window.addEventListener("visibilitychange",()=>{if(document.visibilityState==="h
 
 function url(){const p=new URLSearchParams();p.set("federal","1023");defs.forEach(d=>{if(d.id!=="federal"){const v=digits($(d.id).value);if(v)p.set(d.id,v)}});return `${location.origin}${location.pathname}?${p}`}
 function loadUrl(){const p=new URLSearchParams(location.search);let found=false;defs.forEach(d=>{if(d.id==="federal"){$("federal").value="1023";return}const v=p.get(d.id);if(v){$(d.id).value=digits(v).slice(0,d.max);lookup(d);found=true}});return found}
-function allCandidatesReady(){return defs.every(d=>digits($(d.id).value).length===d.max&&state.has(d.id))}
+function allCandidatesReady(){return defs.every(d=>{const value=digits($(d.id).value);const c=state.get(d.id);return value.length===d.max&&c&&digits(c.number)===value})}
 
-function renderPreview(){
- if(!allCandidatesReady()){const first=defs.find(d=>!state.has(d.id)||digits($(d.id).value).length!==d.max);showAlert("Preencha todos os campos com números válidos antes de conferir sua colinha.",first?.id);return false;}
+async function renderPreview(){
+ if(pendingLookups.size) await Promise.all([...pendingLookups.values()]);
+ if(!allCandidatesReady()){
+  const first=defs.find(d=>{const value=digits($(d.id).value),c=state.get(d.id);return value.length!==d.max||!c||digits(c.number)!==value});
+  showAlert("Preencha todos os campos com números válidos antes de conferir sua colinha.",first?.id);
+  return false;
+ }
  const rows=$("rows");rows.innerHTML="";
  defs.forEach(d=>{const v=digits($(d.id).value),c=state.get(d.id);rows.insertAdjacentHTML("beforeend",`<article class="review-row"><div class="review-role">${esc(d.role)}</div><div class="review-main">${c.photo?`<img src="${esc(c.photo)}" alt="">`:""}<div><strong>${esc(c.ballotName)}</strong><span>${esc(c.party||"")}</span></div></div><div class="review-number">${esc(v)}</div></article>`)});
  buildPrintSheet();$("preview").classList.remove("hidden");$("step2").classList.add("active");history.replaceState(null,"",url());saveDraft();$("preview").scrollIntoView({behavior:"smooth",block:"start"});return true;
@@ -69,11 +90,11 @@ async function generateBallotImage(){
  return new Promise(resolve=>canvas.toBlob(blob=>resolve(blob?{blob,imageUrl:URL.createObjectURL(blob),canvas}:null),"image/png"));
 }
 async function showGeneratedImage(){const result=await generateBallotImage();if(!result)return null;if(lastImage?.imageUrl)URL.revokeObjectURL(lastImage.imageUrl);lastImage=result;$("generatedImage").src=result.imageUrl;$("imageResult").classList.remove("hidden");$("step3").classList.add("active");$("imageResult").scrollIntoView({behavior:"smooth",block:"center"});return result}
-async function shareImage(){if(!renderPreview())return;const result=await showGeneratedImage();if(!result)return;const file=new File([result.blob],"minha-colinha-2026.png",{type:"image/png"});try{if(navigator.canShare?.({files:[file]})&&navigator.share){await navigator.share({title:"Minha Colinha — Eleições 2026",text:"Minha colinha de votação.",files:[file]})}else if(navigator.share){await navigator.share({title:"Minha Colinha — Eleições 2026",url:url()})}else{showAlert("A função de compartilhamento do navegador não está disponível. Use BAIXAR PNG ou COPIAR LINK.")}}catch(e){}}
-async function downloadImage(){if(!renderPreview())return;const result=await showGeneratedImage();if(!result)return;const a=document.createElement("a");a.href=result.imageUrl;a.download="minha-colinha-2026.png";a.click()}
-function printPdf(){if(!renderPreview())return;window.print()}
+async function shareImage(){if(!await renderPreview())return;const result=await showGeneratedImage();if(!result)return;const file=new File([result.blob],"minha-colinha-2026.png",{type:"image/png"});try{if(navigator.canShare?.({files:[file]})&&navigator.share){await navigator.share({title:"Minha Colinha — Eleições 2026",text:"Minha colinha de votação.",files:[file]})}else if(navigator.share){await navigator.share({title:"Minha Colinha — Eleições 2026",url:url()})}else{showAlert("A função de compartilhamento do navegador não está disponível. Use BAIXAR PNG ou COPIAR LINK.")}}catch(e){}}
+async function downloadImage(){if(!await renderPreview())return;const result=await showGeneratedImage();if(!result)return;const a=document.createElement("a");a.href=result.imageUrl;a.download="minha-colinha-2026.png";a.click()}
+async function printPdf(){if(!await renderPreview())return;window.print()}
 
-$("form").addEventListener("submit",e=>{e.preventDefault();renderPreview()});$("confirmGenerate").onclick=showGeneratedImage;$("share").onclick=shareImage;$("downloadImage").onclick=downloadImage;$("printPdf").onclick=printPdf;
+$("form").addEventListener("submit",async e=>{e.preventDefault();await renderPreview()});$("confirmGenerate").onclick=async()=>{if(!await renderPreview())return;await showGeneratedImage()};$("share").onclick=shareImage;$("downloadImage").onclick=downloadImage;$("printPdf").onclick=printPdf;
 $("copy").onclick=async()=>{try{await navigator.clipboard.writeText(url());$("copy").textContent="LINK COPIADO";setTimeout(()=>$("copy").textContent="COPIAR LINK",1600)}catch{showAlert("Não foi possível copiar automaticamente. Você pode copiar o endereço da página manualmente.")}};
 $("edit").onclick=()=>{$("preview").classList.add("hidden");$("imageResult").classList.add("hidden");window.scrollTo({top:0,behavior:"smooth"})};
 
@@ -83,4 +104,11 @@ document.querySelectorAll("[data-search]").forEach(btn=>btn.onclick=()=>{current
 $("searchInput").addEventListener("input",searchCandidates);$("closeSearch").onclick=()=>$("searchModal").classList.add("hidden");$("searchModal").addEventListener("click",e=>{if(e.target.id==="searchModal")$("searchModal").classList.add("hidden")});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){$("searchModal").classList.add("hidden");$("alertModal").classList.add("hidden")}});
 
-const hasUrl=loadUrl();if(!hasUrl)restoreDraft();fetch('/api/health').then(r=>r.json()).then(d=>{$("status").textContent=d.generatedAt?`Dados oficiais do TSE · ${new Date(d.generatedAt).toLocaleString('pt-BR')}`:"Dados do TSE"}).catch(()=>$("status").textContent="Dados do TSE");
+async function initialize(){
+ $("federal").value="1023";
+ await lookup(defs[0]);
+ const hasUrl=loadUrl();
+ if(!hasUrl)restoreDraft();
+ fetch('/api/health').then(r=>r.json()).then(d=>$("status").textContent=d.generatedAt?`Dados oficiais do TSE · ${new Date(d.generatedAt).toLocaleString('pt-BR')}`:"Dados do TSE").catch(()=>$("status").textContent="Dados do TSE");
+}
+initialize();

@@ -99,3 +99,25 @@ test("alerta de validação é personalizado e não usa alert nativo", async()=>
  assert.match(h,/id="alertModal"/);
  assert.doesNotMatch(js,/\balert\(/);
 });
+
+test("deputada federal 1023 é carregada automaticamente ao iniciar", async()=>{
+ const js=await fs.readFile(path.join(root,"public/app.js"),"utf8");
+ assert.match(js,/await lookup\(defs\[0\]\)/);
+ assert.match(js,/\$\("federal"\)\.value="1023"/);
+});
+test("conferência aguarda consultas pendentes e valida o candidato correspondente ao número", async()=>{
+ const js=await fs.readFile(path.join(root,"public/app.js"),"utf8");
+ assert.match(js,/pendingLookups/);
+ assert.match(js,/await Promise\.all\(\[\.\.\.pendingLookups\.values\(\)\]\)/);
+ assert.match(js,/digits\(c\.number\)===value/);
+});
+
+test("Dani 1023 possui foto inicial e fallback no endpoint", async()=>{
+ const d=JSON.parse(await fs.readFile(path.join(root,"data/candidates.json"),"utf8"));
+ const c=d.candidates.find(x=>x.role==="DEPUTADO FEDERAL"&&x.number==="1023");
+ assert.equal(c.ballotName,"DANI LINHARES");
+ assert.equal(c.party,"REPUBLICANOS");
+ assert.ok(c.photo);
+ const s=await fs.readFile(path.join(root,"server.js"),"utf8");
+ assert.match(s,/dani-photo-fallback\.png/);
+});
