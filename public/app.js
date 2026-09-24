@@ -155,16 +155,14 @@ async function generateBallotImage(){
  ctx.fillStyle="#ffffff";ctx.fillRect(0,0,W,H);
  roundedRect(ctx,10,10,W-20,H-20,48,null,"#B7FF00",18);
 
- // Cabeçalho.
- const logo=await loadImage("/assets/dani-logo-reference.png");
- if(logo)drawCover(ctx,logo,52,42,300,92,0);
+ // Cabeçalho — sem logo da Dani.
  ctx.fillStyle="#0A2850";
  ctx.font='800 46px "Inter", Arial, sans-serif';
- ctx.fillText("MINHA COLINHA",52,176);
+ ctx.fillText("MINHA COLINHA",52,92);
  ctx.fillStyle="#123DFF";
  ctx.font='700 35px "Inter", Arial, sans-serif';
  ctx.textAlign="right";
- ctx.fillText("ELEIÇÕES 2026",1028,176);
+ ctx.fillText("ELEIÇÕES 2026",1028,92);
  ctx.textAlign="left";
 
  const candidates=await Promise.all(defs.map(async d=>({
@@ -204,8 +202,8 @@ async function generateBallotImage(){
   const total=number.length*box+(number.length-1)*gap;
   let bx=numberRight-total;
   for(const digit of number){
-    roundedRect(ctx,bx,y+35,box,66,16,def.id==="senador1"?"#102BFF":"#F3F6FA",def.id==="senador1"?"#102BFF":"#DCE4ED",2);
-    ctx.fillStyle=def.id==="senador1"?"#FFFFFF":"#09264C";
+    roundedRect(ctx,bx,y+35,box,66,16,"#F3F6FA","#DCE4ED",2);
+    ctx.fillStyle="#09264C";
     ctx.textAlign="center";
     ctx.font='800 40px "Inter", Arial, sans-serif';
     ctx.fillText(digit,bx+box/2,y+80);

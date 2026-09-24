@@ -24,3 +24,17 @@ test("campo federal é somente leitura e fixo em 1023", async()=>{
  const js=await fs.readFile(path.join(root,"public/app.js"),"utf8");
  assert.match(js,/p\.set\("federal","1023"\)/);
 });
+
+test("compartilhar usa imagem PNG e tamanho alvo 1080x1920", async()=>{
+ const js=await fs.readFile(path.join(root,"public/app.js"),"utf8");
+ assert.match(js,/canvas\.width=W; canvas\.height=H/);
+ assert.match(js,/const W=1080,H=1920/);
+ assert.match(js,/canvas\.toBlob/);
+ assert.match(js,/minha-colinha-2026\.png/);
+ assert.match(js,/navigator\.canShare/);
+});
+test("rodapé usa o texto eleitoral e CNPJ fornecidos", async()=>{
+ const js=await fs.readFile(path.join(root,"public/app.js"),"utf8");
+ assert.match(js,/PROPAGANDA ELEITORAL \| DANIELA LINHARES/);
+ assert.match(js,/68\.403\.629\/0001-16/);
+});
