@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#063777"><title>Minha Colinha — Eleições 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <img src="/assets/dani-logo-reference.png" alt="Dani Linhares" class="logo">
+  </div>
+</header>
+<section class="hero">
+  <div class="eyebrow"><b>01</b> CRIE SUA FOTO DE APOIO</div>
+  <h1>ESCOLHA SUA COLINHA.<br><strong>MOSTRE SUA ESCOLHA.</strong></h1>
+  <p>Digite os números das candidaturas para consultar nome, partido e foto na base sincronizada.</p>
+  <div class="steps"><b>01 COLINHA</b><span>02 CANDIDATOS</span><span>03 COMPARTILHAR</span></div>
+</section>
+<main class="card">
+  <div class="cardhead"><div><small>MINHA COLINHA</small><h2>Eleições 2026</h2></div><span id="status">Verificando dados…</span></div>
+  <form id="form">
+    <div class="grid">
+      <div class="field"><label>DEPUTADA FEDERAL</label><div class="input"><input id="federal" maxlength="4" inputmode="numeric" value="1023" readonly aria-readonly="true" title="Número fixo da Deputada Federal"><span>4</span></div><div id="federalInfo"></div></div>
+      <div class="field"><label>DEPUTADO ESTADUAL</label><div class="input"><input id="estadual" maxlength="5" inputmode="numeric" placeholder="00000"><span>5</span></div><div id="estadualInfo"></div></div>
+      <div class="field"><label>SENADOR — 1º VOTO</label><div class="input"><input id="senador1" maxlength="3" inputmode="numeric" placeholder="000"><span>3</span></div><div id="senador1Info"></div></div>
+      <div class="field"><label>SENADOR — 2º VOTO</label><div class="input"><input id="senador2" maxlength="3" inputmode="numeric" placeholder="000"><span>3</span></div><div id="senador2Info"></div></div>
+      <div class="field"><label>GOVERNADOR</label><div class="input"><input id="governador" maxlength="2" inputmode="numeric" placeholder="00"><span>2</span></div><div id="governadorInfo"></div></div>
+      <div class="field"><label>PRESIDENTE</label><div class="input"><input id="presidente" maxlength="2" inputmode="numeric" placeholder="00"><span>2</span></div><div id="presidenteInfo"></div></div>
+    </div>
+    <button class="primary">GERAR MINHA COLINHA <i>→</i></button>
+  </form>
+  <section id="preview" class="preview hidden" aria-live="polite">
+    <h3>SUA COLINHA</h3>
+    <div id="rows"></div>
+    <div class="actions">
+      <button id="share" class="share-primary">GERAR E COMPARTILHAR IMAGEM</button>
+      <button id="downloadImage">BAIXAR IMAGEM</button>
+      <button id="copy">COPIAR LINK</button>
+      <button id="edit" class="light">EDITAR</button>
+    </div>
+    <div id="imageResult" class="image-result hidden">
+      <p>Imagem pronta em 1080 × 1920. Toque e segure no celular para salvar ou use o botão abaixo.</p>
+      <img id="generatedImage" alt="Prévia da colinha eleitoral em formato vertical">
+    </div>
+  </section>
+</main>
+<footer>Dados de candidaturas: Tribunal Superior Eleitoral / Portal de Dados Abertos.</footer>
+<script src="/app.js" defer></script>
+</body></html>
