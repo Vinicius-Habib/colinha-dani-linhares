@@ -57,3 +57,20 @@ test("cabeçalho usa azul escuro", async()=>{
  const css=await fs.readFile(path.join(root,"public/styles.css"),"utf8");
  assert.match(css,/\.topbar\{min-height:104px;background:#063777/);
 });
+
+test("preview do WhatsApp usa imagem externa ao layout do site", async()=>{
+ const h=await fs.readFile(path.join(root,"public/index.html"),"utf8");
+ assert.match(h,/property="og:image" content="https:\/\/colinha-dani-linhares\.onrender\.com\/assets\/whatsapp-preview\.jpg\?v=8"/);
+ assert.match(h,/property="og:image:width" content="1200"/);
+ assert.match(h,/property="og:image:height" content="630"/);
+ const stat=await fs.stat(path.join(root,"public/assets/whatsapp-preview.jpg"));
+ assert.ok(stat.size>10000);
+});
+
+test("hero usa o novo texto da colinha de votação", async()=>{
+ const h=await fs.readFile(path.join(root,"public/index.html"),"utf8");
+ assert.match(h,/COLINHA DE VOTAÇÃO/);
+ assert.match(h,/PREENCHA COM O NÚMERO DOS SEUS CANDIDATOS/);
+ assert.doesNotMatch(h,/CRIE SUA FOTO DE APOIO/);
+ assert.doesNotMatch(h,/ESCOLHA SUA COLINHA/);
+});
