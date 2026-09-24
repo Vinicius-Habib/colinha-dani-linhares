@@ -1,0 +1,19 @@
+{
+  "generatedAt": null,
+  "source": "TSE — execute npm run sync",
+  "electionYear": 2026,
+  "candidates": [
+    {
+      "id": "1023-demo",
+      "number": "1023",
+      "role": "DEPUTADO FEDERAL",
+      "uf": "MG",
+      "ballotName": "DANI LINHARES",
+      "fullName": "DANIELA DE CASSIA LINHARES",
+      "party": "REPUBLICANOS",
+      "partyName": "REPUBLICANOS",
+      "status": "BASE INICIAL — ATUALIZAR PELO TSE",
+      "photo": null
+    }
+  ]
+}
