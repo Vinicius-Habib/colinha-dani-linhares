@@ -38,3 +38,22 @@ test("rodapé usa o texto eleitoral e CNPJ fornecidos", async()=>{
  assert.match(js,/PROPAGANDA ELEITORAL \| DANIELA LINHARES/);
  assert.match(js,/68\.403\.629\/0001-16/);
 });
+
+
+test("senadores não podem usar o mesmo número", async()=>{
+ const js=await fs.readFile(path.join(root,"public/app.js"),"utf8");
+ assert.match(js,/Escolha um número diferente do outro senador/);
+ assert.match(js,/otherId=d\.id==="senador1" \? "senador2" : "senador1"/);
+});
+
+test("favicon usa arquivo quadrado sem achatamento", async()=>{
+ const h=await fs.readFile(path.join(root,"public/index.html"),"utf8");
+ assert.match(h,/assets\/1023-favicon\.png/);
+ const stat=await fs.stat(path.join(root,"public/assets/1023-favicon.png"));
+ assert.ok(stat.size>1000);
+});
+
+test("cabeçalho usa azul escuro", async()=>{
+ const css=await fs.readFile(path.join(root,"public/styles.css"),"utf8");
+ assert.match(css,/\.topbar\{min-height:104px;background:#063777/);
+});

@@ -17,6 +17,15 @@ async function lookup(d){
  el.value=digits(el.value).slice(0,d.max);
  info.innerHTML=""; el.classList.remove("ok","bad"); state.delete(d.id);
  if(el.value.length!==d.max)return;
+ if((d.id==="senador1" || d.id==="senador2")){
+  const otherId=d.id==="senador1" ? "senador2" : "senador1";
+  const other=digits($(otherId).value);
+  if(other && other===el.value){
+   el.classList.add("bad");
+   info.innerHTML='<div class="msg">Escolha um número diferente do outro senador.</div>';
+   return;
+  }
+ }
  try{
   const r=await fetch(`/api/candidate/${encodeURIComponent(d.role)}/${el.value}`);
   if(!r.ok)throw 0;
@@ -30,7 +39,16 @@ async function lookup(d){
 }
 
 defs.forEach(d=>{
- $(d.id).addEventListener("input",()=>lookup(d));
+ $(d.id).addEventListener("input",()=>{
+  lookup(d);
+  if(d.id==="senador1" || d.id==="senador2"){
+   const otherId=d.id==="senador1" ? "senador2" : "senador1";
+   const otherDef=defs.find(x=>x.id===otherId);
+   if(otherDef && digits($(otherId).value)===digits($(d.id).value) && digits($(d.id).value).length===d.max){
+    lookup(otherDef);
+   }
+  }
+ });
 });
 
 // Deputada Federal: sempre fixa em 1023.
