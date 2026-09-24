@@ -32,8 +32,19 @@
     </div>
     <button class="primary">GERAR MINHA COLINHA <i>→</i></button>
   </form>
-  <section id="preview" class="preview hidden"><h3>SUA COLINHA</h3><div id="rows"></div>
-    <div class="actions"><button id="copy">COPIAR LINK</button><button id="share">COMPARTILHAR</button><button id="edit" class="light">EDITAR</button></div>
+  <section id="preview" class="preview hidden" aria-live="polite">
+    <h3>SUA COLINHA</h3>
+    <div id="rows"></div>
+    <div class="actions">
+      <button id="share" class="share-primary">GERAR E COMPARTILHAR IMAGEM</button>
+      <button id="downloadImage">BAIXAR IMAGEM</button>
+      <button id="copy">COPIAR LINK</button>
+      <button id="edit" class="light">EDITAR</button>
+    </div>
+    <div id="imageResult" class="image-result hidden">
+      <p>Imagem pronta em 1080 × 1920. Toque e segure no celular para salvar ou use o botão abaixo.</p>
+      <img id="generatedImage" alt="Prévia da colinha eleitoral em formato vertical">
+    </div>
   </section>
 </main>
 <footer>Dados de candidaturas: Tribunal Superior Eleitoral / Portal de Dados Abertos.</footer>
