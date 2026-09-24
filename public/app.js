@@ -25,12 +25,27 @@ async function lookup(d){
 defs.forEach(d=>document.getElementById(d.id).addEventListener("input",()=>lookup(d)));
 function url(){
  const p=new URLSearchParams();
- defs.forEach(d=>{const v=digits(document.getElementById(d.id).value);if(v)p.set(d.id,v)});
+ p.set("federal","1023");
+ defs.forEach(d=>{
+  if(d.id==="federal") return;
+  const v=digits(document.getElementById(d.id).value);
+  if(v)p.set(d.id,v);
+ });
  return `${location.origin}${location.pathname}?${p}`;
 }
 function loadUrl(){
  const p=new URLSearchParams(location.search);
- defs.forEach(d=>{const v=p.get(d.id);if(v){document.getElementById(d.id).value=digits(v).slice(0,d.max);lookup(d)}});
+ defs.forEach(d=>{
+  if(d.id==="federal"){
+   document.getElementById("federal").value="1023";
+   return;
+  }
+  const v=p.get(d.id);
+  if(v){
+   document.getElementById(d.id).value=digits(v).slice(0,d.max);
+   lookup(d);
+  }
+ });
 }
 document.getElementById("form").addEventListener("submit",e=>{
  e.preventDefault();const rows=document.getElementById("rows");rows.innerHTML="";

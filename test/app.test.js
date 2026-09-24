@@ -17,3 +17,10 @@ test("catch-all usa sintaxe compatível com Express 5",async()=>{
  const s=await fs.readFile(path.join(root,"server.js"),"utf8");
  assert.match(s,/app\.get\("\/\{\*splat\}"/);
 });
+
+test("campo federal é somente leitura e fixo em 1023", async()=>{
+ const h=await fs.readFile(path.join(root,"public/index.html"),"utf8");
+ assert.match(h,/id="federal"[^>]*value="1023"[^>]*readonly/);
+ const js=await fs.readFile(path.join(root,"public/app.js"),"utf8");
+ assert.match(js,/p\.set\("federal","1023"\)/);
+});
