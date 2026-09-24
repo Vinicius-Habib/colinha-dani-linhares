@@ -23,6 +23,25 @@ app.get("/api/health", async (_req,res) => {
   res.json({ok:true,source:d.source,generatedAt:d.generatedAt,count:d.candidates.length});
 });
 
+app.get("/api/candidates/search", async (req,res) => {
+  const role=String(req.query.role||"").toUpperCase();
+  const q=String(req.query.q||"").trim();
+  if(!roles.has(role) || q.length<2) return res.json([]);
+  const d=await load();
+  const nq=q.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+  const scored=d.candidates.filter(x=>x.role===role).map(c=>{
+    const fields=[c.ballotName,c.fullName,c.party,c.partyName,c.number].map(v=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase());
+    let score=0;
+    if(fields[0]===nq) score+=100;
+    if(fields[0].startsWith(nq)) score+=60;
+    if(fields[1].startsWith(nq)) score+=50;
+    if(fields[4]===nq) score+=90;
+    if(fields.some(v=>v.includes(nq))) score+=20;
+    return {c,score};
+  }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score||a.c.ballotName.localeCompare(b.c.ballotName,"pt-BR")).slice(0,20).map(x=>x.c);
+  res.json(scored);
+});
+
 app.get("/api/candidate/:role/:number", async (req,res) => {
   const role=decodeURIComponent(req.params.role).toUpperCase();
   const number=clean(req.params.number);

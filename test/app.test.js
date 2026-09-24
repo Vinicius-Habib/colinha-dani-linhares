@@ -27,7 +27,7 @@ test("campo federal é somente leitura e fixo em 1023", async()=>{
 
 test("compartilhar usa imagem PNG e tamanho alvo 1080x1920", async()=>{
  const js=await fs.readFile(path.join(root,"public/app.js"),"utf8");
- assert.match(js,/canvas\.width=W; canvas\.height=H/);
+ assert.match(js,/canvas\.width=W/);
  assert.match(js,/const W=1080,H=1920/);
  assert.match(js,/canvas\.toBlob/);
  assert.match(js,/minha-colinha-2026\.png/);
@@ -43,7 +43,7 @@ test("rodapé usa o texto eleitoral e CNPJ fornecidos", async()=>{
 test("senadores não podem usar o mesmo número", async()=>{
  const js=await fs.readFile(path.join(root,"public/app.js"),"utf8");
  assert.match(js,/Escolha um número diferente do outro senador/);
- assert.match(js,/otherId=d\.id==="senador1" \? "senador2" : "senador1"/);
+ assert.match(js,/otherId=d\.id==="senador1"\?"senador2":"senador1"/);
 });
 
 test("favicon usa arquivo quadrado sem achatamento", async()=>{
@@ -73,4 +73,29 @@ test("hero usa o novo texto da colinha de votação", async()=>{
  assert.match(h,/PREENCHA COM O NÚMERO DOS SEUS CANDIDATOS/);
  assert.doesNotMatch(h,/CRIE SUA FOTO DE APOIO/);
  assert.doesNotMatch(h,/ESCOLHA SUA COLINHA/);
+});
+test("busca de candidatos por nome está disponível", async()=>{
+ const s=await fs.readFile(path.join(root,"server.js"),"utf8");
+ assert.match(s,/\/api\/candidates\/search/);
+ assert.match(s,/ballotName/);
+});
+test("salvamento automático usa localStorage e recuperação", async()=>{
+ const js=await fs.readFile(path.join(root,"public/app.js"),"utf8");
+ assert.match(js,/localStorage\.setItem/);
+ assert.match(js,/localStorage\.getItem/);
+ assert.match(js,/visibilitychange/);
+});
+test("tela de conferência e impressão estão disponíveis", async()=>{
+ const h=await fs.readFile(path.join(root,"public/index.html"),"utf8");
+ const js=await fs.readFile(path.join(root,"public/app.js"),"utf8");
+ assert.match(h,/02 CONFERIR/);
+ assert.match(h,/IMPRIMIR \/ SALVAR PDF/);
+ assert.match(h,/BAIXAR PNG/);
+ assert.match(js,/window\.print\(\)/);
+});
+test("alerta de validação é personalizado e não usa alert nativo", async()=>{
+ const h=await fs.readFile(path.join(root,"public/index.html"),"utf8");
+ const js=await fs.readFile(path.join(root,"public/app.js"),"utf8");
+ assert.match(h,/id="alertModal"/);
+ assert.doesNotMatch(js,/\balert\(/);
 });

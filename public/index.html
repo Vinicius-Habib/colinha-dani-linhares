@@ -25,43 +25,50 @@
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-<header class="topbar">
-  <a class="brand" href="/" aria-label="Colinha Dani Linhares — início">
-    <img src="/assets/dani-logo-final.png" alt="Dani Linhares" class="logo">
-  </a>
-</header>
+<header class="topbar"><a class="brand" href="/" aria-label="Colinha Dani Linhares — início"><img src="/assets/dani-logo-final.png" alt="Dani Linhares" class="logo"></a></header>
 <section class="hero">
   <h1>COLINHA DE VOTAÇÃO<br><strong>PREENCHA COM O NÚMERO DOS SEUS CANDIDATOS</strong></h1>
-  <div class="steps"><b>01 COLINHA</b><span>02 CANDIDATOS</span><span>03 COMPARTILHAR</span></div>
+  <div class="steps"><b id="step1">01 PREENCHER</b><span id="step2">02 CONFERIR</span><span id="step3">03 COMPARTILHAR</span></div>
 </section>
 <main class="card">
   <div class="cardhead"><div><small>MINHA COLINHA</small><h2>Eleições 2026</h2></div><span id="status">Verificando dados…</span></div>
+  <div class="save-note" id="saveNote" aria-live="polite">Sua colinha é salva automaticamente neste dispositivo.</div>
   <form id="form">
     <div class="grid">
       <div class="field"><label>DEPUTADA FEDERAL</label><div class="input"><input id="federal" maxlength="4" inputmode="numeric" value="1023" readonly aria-readonly="true" title="Número fixo da Deputada Federal"><span>4</span></div><div id="federalInfo"></div></div>
-      <div class="field"><label>DEPUTADO ESTADUAL</label><div class="input"><input id="estadual" maxlength="5" inputmode="numeric" placeholder="00000"><span>5</span></div><div id="estadualInfo"></div></div>
-      <div class="field"><label>SENADOR — 1º VOTO</label><div class="input"><input id="senador1" maxlength="3" inputmode="numeric" placeholder="000"><span>3</span></div><div id="senador1Info"></div></div>
-      <div class="field"><label>SENADOR — 2º VOTO</label><div class="input"><input id="senador2" maxlength="3" inputmode="numeric" placeholder="000"><span>3</span></div><div id="senador2Info"></div></div>
-      <div class="field"><label>GOVERNADOR</label><div class="input"><input id="governador" maxlength="2" inputmode="numeric" placeholder="00"><span>2</span></div><div id="governadorInfo"></div></div>
-      <div class="field"><label>PRESIDENTE</label><div class="input"><input id="presidente" maxlength="2" inputmode="numeric" placeholder="00"><span>2</span></div><div id="presidenteInfo"></div></div>
+      <div class="field"><label>DEPUTADO ESTADUAL</label><div class="input"><input id="estadual" maxlength="5" inputmode="numeric" placeholder="00000"><span>5</span></div><button type="button" class="search-link" data-search="estadual">BUSCAR POR NOME</button><div id="estadualInfo"></div></div>
+      <div class="field"><label>SENADOR — 1º VOTO</label><div class="input"><input id="senador1" maxlength="3" inputmode="numeric" placeholder="000"><span>3</span></div><button type="button" class="search-link" data-search="senador1">BUSCAR POR NOME</button><div id="senador1Info"></div></div>
+      <div class="field"><label>SENADOR — 2º VOTO</label><div class="input"><input id="senador2" maxlength="3" inputmode="numeric" placeholder="000"><span>3</span></div><button type="button" class="search-link" data-search="senador2">BUSCAR POR NOME</button><div id="senador2Info"></div></div>
+      <div class="field"><label>GOVERNADOR</label><div class="input"><input id="governador" maxlength="2" inputmode="numeric" placeholder="00"><span>2</span></div><button type="button" class="search-link" data-search="governador">BUSCAR POR NOME</button><div id="governadorInfo"></div></div>
+      <div class="field"><label>PRESIDENTE</label><div class="input"><input id="presidente" maxlength="2" inputmode="numeric" placeholder="00"><span>2</span></div><button type="button" class="search-link" data-search="presidente">BUSCAR POR NOME</button><div id="presidenteInfo"></div></div>
     </div>
-    <button class="primary">GERAR MINHA COLINHA <i>→</i></button>
+    <button class="primary" type="submit">CONFERIR MINHA COLINHA <i>→</i></button>
   </form>
+
   <section id="preview" class="preview hidden" aria-live="polite">
-    <h3>SUA COLINHA</h3>
+    <div class="review-head"><div><span class="step-badge">02 CONFERIR</span><h3>Confira antes de gerar</h3><p>Verifique nome, partido e número de cada candidatura.</p></div></div>
     <div id="rows"></div>
-    <div class="actions">
-      <button id="share" class="share-primary">GERAR E COMPARTILHAR IMAGEM</button>
-      <button id="downloadImage">BAIXAR IMAGEM</button>
-      <button id="copy">COPIAR LINK</button>
+    <div class="review-confirm">
+      <button id="confirmGenerate" class="share-primary">CONFIRMAR E GERAR IMAGEM</button>
+      <button id="printPdf">IMPRIMIR / SALVAR PDF</button>
+      <button id="downloadImage">BAIXAR PNG</button>
+      <button id="share" class="secondary">COMPARTILHAR</button>
+      <button id="copy" class="secondary">COPIAR LINK</button>
       <button id="edit" class="light">EDITAR</button>
     </div>
-    <div id="imageResult" class="image-result hidden">
-      <p>Imagem pronta em 1080 × 1920. Toque e segure no celular para salvar ou use o botão abaixo.</p>
-      <img id="generatedImage" alt="Prévia da colinha eleitoral em formato vertical">
-    </div>
+    <div id="imageResult" class="image-result hidden"><p>Imagem pronta em 1080 × 1920.</p><img id="generatedImage" alt="Prévia da colinha eleitoral em formato vertical"></div>
+  </section>
+
+  <section id="printSheet" class="print-sheet" aria-hidden="true">
+    <h1>MINHA COLINHA</h1><div class="print-subtitle">ELEIÇÕES 2026</div><div id="printRows"></div>
+    <div class="print-footer">PROPAGANDA ELEITORAL | DANIELA LINHARES | CNPJ: 68.403.629/0001-16</div>
   </section>
 </main>
 <footer>PROPAGANDA ELEITORAL | DANIELA LINHARES | CNPJ: 68.403.629/0001-16</footer>
+
+<div id="searchModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+  <div class="modal-box"><button class="modal-close" id="closeSearch" aria-label="Fechar">×</button><span class="step-badge">BUSCAR CANDIDATO</span><h3 id="searchTitle">Encontre pelo nome</h3><p id="searchRole"></p><input id="searchInput" class="modal-input" type="search" placeholder="Digite nome, partido ou número" autocomplete="off"><div id="searchResults" class="search-results"><span class="empty-search">Digite pelo menos 2 caracteres.</span></div></div>
+</div>
+<div id="alertModal" class="modal hidden" role="alertdialog" aria-modal="true" aria-labelledby="alertTitle"><div class="modal-box alert-box"><div class="alert-icon">!</div><h3 id="alertTitle">Atenção</h3><p id="alertMessage"></p><button id="closeAlert" class="primary small">ENTENDI</button></div></div>
 <script src="/app.js" defer></script>
 </body></html>
